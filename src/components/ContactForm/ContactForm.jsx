@@ -1,72 +1,80 @@
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import css from "./ContactForm.module.css"
-import * as Yup from 'yup';
-import { useDispatch } from 'react-redux';
-import { addContact } from '../../redux/contactsOps';
+import { ErrorMessage, Field, Form, Formik } from "formik";
+import * as Yup from "yup";
+import { useDispatch } from "react-redux";
 
-function ContactForm() {
+import css from "./ContactForm.module.css";
+import { addContact } from "../../redux/contacts/operations";
+import toast from "react-hot-toast";
+
+const phoneRegExp = /^[\d-]+$/;
+const ContactsValidationSchema = Yup.object().shape({
+  name: Yup.string()
+    .required("Name is required")
+    .min(3, "Name must have min 3 characters")
+    .max(50, "Contact name must be less than 50 characters"),
+  number: Yup.string()
+    .matches(phoneRegExp, "Invalid phone number!")
+    .required("Phone number is required"),
+});
+
+const ContactForm = () => {
   const dispatch = useDispatch();
 
-  const phoneRegExp = /^[0-9]{3}-[0-9]{2}-[0-9]{2}$/;
-
-  const ContactSchema = Yup.object().shape({
-    username: Yup.string()
-      .min(3, 'Мінімум від 3 символів!')
-      .max(50, 'Максимум 50 символів!')
-      .required('Required'),
-    phoneNumber: Yup.string()
-      .min(3, 'Мінімум від 3 символів!')
-      .max(50, 'Максимум 50 символів!')
-      .matches(
-        phoneRegExp,
-        "Номер телефону має співпадати з форматом 'xxx-xx-xx'"
-      ).required('Required'),
-      
-  });
-
-  const handleSubmit = (values, actions) => {
-    const finalContact = {
-      name: values.username,
-      number: values.phoneNumber,
-    };
-
-    dispatch(addContact(finalContact));
-    
-    actions.resetForm();
+  const handleSubmit = (values, { resetForm }) => {
+    dispatch(
+      addContact({
+        name: values.name.trim(),
+        number: values.number.trim(),
+      })
+    )
+      .unwrap()
+      .then(() => {
+        toast.success("Contact added successfully🎉");
+      });
+    resetForm();
   };
 
   return (
     <Formik
-      initialValues={{
-        username: '',
-        phoneNumber: '',
-      }}
+      initialValues={{ name: "", number: "" }}
       onSubmit={handleSubmit}
-      validationSchema={ContactSchema}
+      validationSchema={ContactsValidationSchema}
     >
-      <Form className={css.contactForm}>
-        <label className={css.contactLabel}>
-          <span className={css.contactLabelText}>Name: </span>
-          <Field className={css.contactInput} type="text" name="username" />
+      <Form className={css.form}>
+        <label className={css.label}>
+          Name
+          <Field
+            className={css.input}
+            type="text"
+            name="name"
+            placeholder="Ivan Petrov"
+          />
           <ErrorMessage
-            className={css.error}
-            name="username"
+            className={css.errorText}
+            name="name"
             component="span"
           />
         </label>
-        <label className={css.contactLabel}>
-          <span className={css.contactLabelText}>Number: </span>
-          <Field className={css.contactInput} type="text" name="phoneNumber" />
+        <label className={css.label}>
+          Number
+          <Field
+            className={css.input}
+            type="tel"
+            name="number"
+            placeholder="050-123-45-67"
+          />
           <ErrorMessage
-            className={css.error}
-            name="phoneNumber"
+            className={css.errorText}
+            name="number"
             component="span"
           />
         </label>
-        <button className={css.contactBtn} type="submit">Add contact</button>
+        <button type="submit" className={css.button}>
+          Add Contact
+        </button>
       </Form>
     </Formik>
   );
-}
+};
 
 export default ContactForm;

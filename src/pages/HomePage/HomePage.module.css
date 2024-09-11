@@ -1,0 +1,10 @@
+.title {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.text {
+  font-size: 30px;
+  font-style: italic;
+  color: rgb(94, 62, 153);
+}

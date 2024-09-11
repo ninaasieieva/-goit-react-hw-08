@@ -4,13 +4,18 @@ import { IoPersonSharp } from "react-icons/io5";
 import css from "./Contact.module.css";
 
 import { MdDeleteForever } from "react-icons/md";
-import { deleteContact } from "../../redux/contactsOps";
+import { deleteContact } from "../../redux/contacts/operations";
+import toast from "react-hot-toast";
 
 const Contact = ({ name, number, id }) => {
   const dispatch = useDispatch();
 
   const handleDelete = () => {
-    dispatch(deleteContact(id));
+    dispatch(deleteContact(id))
+      .unwrap()
+      .then(() => {
+        toast.success("Contact deleted successfully🎉");
+      });
   };
 
   return (
